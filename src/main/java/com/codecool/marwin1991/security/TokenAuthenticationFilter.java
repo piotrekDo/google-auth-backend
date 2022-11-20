@@ -28,14 +28,29 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-        //TODO
+        try {
+
+            String jwt = getJwtFromReqest(request);
+            if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
+                String userID = tokenProvider.getUserIdFromToken(jwt);
+                UserDetails userDetails = userService.loadUserById(userID);
+                UsernamePasswordAuthenticationToken authenticationToken =
+                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+
+                authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+            }
+
+        } catch (Exception e) {
+            log.error("Could not authenticate user");
+        }
 
         filterChain.doFilter(request, response);
     }
 
     private String getJwtFromReqest(HttpServletRequest request) {
         String token = request.getHeader("Authorization");
-        if(token.startsWith("Bearer ")){
+        if (token.startsWith("Bearer ")) {
             return token.substring(7);
         }
         return "";

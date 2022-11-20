@@ -33,7 +33,7 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
             return processOAuth2User(userRequest, oAuth2User);
         } catch (AuthenticationException ex) {
             throw ex;
-        } catch (Exception e){
+        } catch (Exception e) {
             throw new InternalAuthenticationServiceException(e.getMessage(), e.getCause());
         }
     }
@@ -41,13 +41,13 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
     private OAuth2User processOAuth2User(OAuth2UserRequest userRequest, OAuth2User oAuth2User) {
         OAuth2UserInfo oAuth2UserInfo = OAuth2UserInfoFactory.get(userRequest.getClientRegistration().getRegistrationId(), oAuth2User.getAttributes());
 
-        if(StringUtils.isEmpty(oAuth2UserInfo.getEmail())){
+        if (StringUtils.isEmpty(oAuth2UserInfo.getEmail())) {
             throw new OAuth2AuthenticationProcessingException("Email not found from provider");
         }
 
         Optional<AppUser> userOptional = userRepository.findByEmail(oAuth2UserInfo.getEmail());
         AppUser appUser;
-        if(userOptional.isPresent()){
+        if (userOptional.isPresent()) {
             appUser = userOptional.get();
             //TODO check provider if equals
             appUser = update(appUser, oAuth2UserInfo);
@@ -61,13 +61,17 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
     private AppUser register(OAuth2UserRequest userRequest, OAuth2UserInfo oAuth2UserInfo) {
         AppUser appUser = new AppUser();
 
-        throw new RuntimeException("not implemented");
-
-        // return userRepository.save(appUser);
+        appUser.setProvider(AuthProvider.valueOf(userRequest.getClientRegistration().getRegistrationId()));
+        appUser.setProviderId(oAuth2UserInfo.getId());
+        appUser.setName(oAuth2UserInfo.getName());
+        appUser.setEmail(oAuth2UserInfo.getEmail());
+        appUser.setImageUrl(oAuth2UserInfo.getImageUrl());
+        return userRepository.save(appUser);
     }
 
     private AppUser update(AppUser appUser, OAuth2UserInfo oAuth2UserInfo) {
-        throw new RuntimeException("not implemented");
-        // return userRepository.save(appUser);
+        appUser.setName(oAuth2UserInfo.getName());
+        appUser.setImageUrl(oAuth2UserInfo.getImageUrl());
+        return userRepository.save(appUser);
     }
 }

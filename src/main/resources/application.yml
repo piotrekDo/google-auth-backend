@@ -1,11 +1,33 @@
 spring:
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  datasource:
+    url: jdbc:h2:mem:test
+    driverClassName: org.h2.Driver
+    username: codecool
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    generate-ddl: true
+    databaseplatform: org.hibernate.dialect.H2Dialect
+
+
   security:
     oauth2:
       client:
         registration:
           google:
-            client-id: 511016516698-hr7unst1j7msevdmb0tmicdnr332ns90.apps.googleusercontent.com
+            client-id: 987508439284-h6ufuat8jhej8metal9btujstd7i5hvi.apps.googleusercontent.com
             redirectUri: "{baseUrl}/oauth2/callback/{registrationId}"
             scope:
               - email
               - profile
+
+app:
+  tokenSecret: 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
+  tokenExpirationMsec: 864000000
+  authorizedRedirectUris:
+    - http://localhost:3000/oauth2/redirect
